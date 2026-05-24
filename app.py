@@ -108,6 +108,9 @@ if submit_button:
         try:
             with st.spinner("Predicting student performance..."):
                 response = requests.post(API_URL, json=payload, timeout=30)
+            
+            st.write("Status Code:", response.status_code)
+            st.write("Response Text:", response.text)
 
             if response.status_code == 200:
                 result = response.json()
