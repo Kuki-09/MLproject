@@ -10,7 +10,6 @@ from sklearn.ensemble import (
 )
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
-from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 from xgboost import XGBRegressor
 
@@ -86,16 +85,16 @@ class ModelTrainer:
 
             model_report:dict=evaluate_models(X_train=X_train,y_train=y_train,X_test=X_test,y_test=y_test,
                                              models=models,param=params)
-            
-            ## To get best model score from dict
-            best_model_score = max(sorted(model_report.values()))
+            best_model_name = max(
+                model_report,
+                key=lambda x: model_report[x]["after_score"]
+            )
 
-            ## To get best model name from dict
+            best_model = model_report[best_model_name]["model"]
+            best_model_score = model_report[best_model_name]["after_score"]
 
-            best_model_name = list(model_report.keys())[
-                list(model_report.values()).index(best_model_score)
-            ]
-            best_model = models[best_model_name]
+            print(f"\nBest Model: {best_model_name}")
+            print(f"Best Model R2 Score: {best_model_score:.4f}")
 
             if best_model_score<0.6:
                 raise CustomException("No best model found")
