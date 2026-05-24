@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-API_URL = "https://mlproject-ehb3.onrender.com"
+API_URL = "https://mlproject-ehb3.onrender.com/predict"
 
 st.set_page_config(
     page_title="Student Performance Predictor",
