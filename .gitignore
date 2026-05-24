@@ -208,8 +208,6 @@ __marimo__/
 
 **/.DS_Store
 catboost_info/
-artifacts/
 logs/
 mlruns/
-*.pkl
 *.joblib
