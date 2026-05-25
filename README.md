@@ -22,9 +22,9 @@ This project predicts a student's **math score** using these features.
 ```
 User (Browser)
      ↓
-Streamlit Frontend
+Streamlit Frontend (Streamlit Cloud)
      ↓
-FastAPI Backend (/predict)
+FastAPI Backend on Render (/predict)
      ↓
 Predict Pipeline (Preprocessing + Model)
      ↓
@@ -59,40 +59,8 @@ Prediction Output
 
 ### 🌐 Deployment
 
-- FastAPI (Backend API)
-- Streamlit (Frontend UI)
-
----
-
-## 📁 Project Structure
-
-```
-MLproject/
-│
-├── src/
-│   ├── components/
-│   │   ├── data_ingestion.py
-│   │   ├── data_transformation.py
-│   │   ├── model_trainer.py
-│   │
-│   ├── pipeline/
-│   │   ├── train_pipeline.py
-│   │   ├── predict_pipeline.py
-│   │
-│   ├── exception.py
-│   ├── logger.py
-│   ├── utils.py
-│
-├── app.py                  # Streamlit UI
-├── main.py                 # FastAPI app
-├── requirements.txt
-├── setup.py
-├── artifacts/              # saved model + preprocessor
-├── logs/
-├── data/
-│   └── stud.csv
-└── README.md
-```
+- **FastAPI** — Backend API, deployed on **Render**
+- **Streamlit** — Frontend UI, deployed on **Streamlit Cloud**
 
 ---
 
@@ -196,6 +164,29 @@ POST /predict
 
 ---
 
+## ☁️ Deployment
+
+### Backend — Render
+
+The FastAPI backend is deployed on **[Render](https://render.com)**.
+
+- Render automatically builds and runs the FastAPI app from the repository
+- Uses `uvicorn` as the ASGI server
+- **Start Command:**
+  ```bash
+  uvicorn src.api.main:app --host 0.0.0.0 --port 10000
+  ```
+
+### Frontend — Streamlit Cloud
+
+The Streamlit frontend is deployed on **[Streamlit Cloud](https://streamlit.io/cloud)**.
+
+- Connects directly to the GitHub repository
+- Reads `requirements.txt` for dependencies
+- The API base URL in `app.py` should point to the deployed Render backend URL
+
+---
+
 ## 🛠️ How to Run Locally
 
 ### 1️⃣ Clone repository
@@ -228,7 +219,7 @@ python -m src.pipeline.train_pipeline
 ### 5️⃣ Run FastAPI backend
 
 ```bash
-uvicorn main:app --reload
+uvicorn src.api.main:app --reload
 ```
 
 ### 6️⃣ Run Streamlit frontend
@@ -245,8 +236,8 @@ streamlit run app.py
 ✔ Multiple model comparison  
 ✔ Hyperparameter tuning  
 ✔ Modular code structure  
-✔ FastAPI backend integration  
-✔ Streamlit frontend  
+✔ FastAPI backend — deployed on **Render**  
+✔ Streamlit frontend — deployed on **Streamlit Cloud**  
 ✔ Production-ready architecture
 
 ---
