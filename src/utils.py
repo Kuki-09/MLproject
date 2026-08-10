@@ -1,10 +1,13 @@
 import os
 import sys
 import pickle
+import numpy as np
+
 from sklearn.metrics import r2_score
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, cross_val_score
 
 from src.exception import CustomException
+
 
 def save_object(file_path, obj):
     try:
@@ -17,50 +20,90 @@ def save_object(file_path, obj):
 
     except Exception as e:
         raise CustomException(e, sys)
-    
-def evaluate_models(X_train, y_train, X_test, y_test, models, param):
+
+
+def evaluate_models(
+    X_train,
+    y_train,
+    models,
+    param,
+    cv=5
+):
     try:
+
         report = {}
 
         print("\nModel Performance Comparison:\n")
 
-        for i in range(len(list(models))):
-            model_name = list(models.keys())[i]
-            model = list(models.values())[i]
+        for model_name, model in models.items():
+
+            print(f"{model_name}")
+
+            # ------------------------------------------------
+            # 1. BASELINE CV SCORE
+            # ------------------------------------------------
+
+            baseline_scores = cross_val_score(
+                model,
+                X_train,
+                y_train,
+                cv=cv,
+                scoring="r2"
+            )
+
+            baseline_cv_score = baseline_scores.mean()
+
+            print(
+                f"Baseline CV R2: {baseline_cv_score:.4f}"
+            )
+
+            # ------------------------------------------------
+            # 2. HYPERPARAMETER TUNING
+            # ------------------------------------------------
+
             para = param[model_name]
 
-            # 🔴 BEFORE TUNING
-            model.fit(X_train, y_train)
-            y_pred_before = model.predict(X_test)
-            before_score = r2_score(y_test, y_pred_before)
+            gs = GridSearchCV(
+                estimator=model,
+                param_grid=para,
+                cv=cv,
+                scoring="r2",
+                n_jobs=-1
+            )
 
-            # 🟢 GRID SEARCH
-            gs = GridSearchCV(model, para, cv=3)
             gs.fit(X_train, y_train)
 
-            # 🔴 AFTER TUNING
+            # ------------------------------------------------
+            # 3. BEST CV SCORE AFTER TUNING
+            # ------------------------------------------------
+
+            best_cv_score = gs.best_score_
+
             best_model = gs.best_estimator_
-            y_pred_after = best_model.predict(X_test)
-            after_score = r2_score(y_test, y_pred_after)
 
-            improvement = after_score - before_score
+            improvement = best_cv_score - baseline_cv_score
 
-            # Store final score
+            print(
+                f"Best CV R2: {best_cv_score:.4f}"
+            )
+
+            print(
+                f"Improvement: {improvement:.4f}"
+            )
+
+            print(
+                f"Best Params: {gs.best_params_}"
+            )
+
+            print("-" * 50)
+
             report[model_name] = {
-                "before_score": before_score,
-                "after_score": after_score,
+                "baseline_cv_score": baseline_cv_score,
+                "best_cv_score": best_cv_score,
                 "improvement": improvement,
                 "best_params": gs.best_params_,
-                "model": gs.best_estimator_
+                "model": best_model
             }
-
-            # 🖨️ PRINT EVERYTHING
-            print(f"{model_name}")
-            print(f"Before Tuning R2: {before_score:.4f}")
-            print(f"After Tuning R2:  {after_score:.4f}")
-            print(f"Improvement:      {improvement:.4f}")
-            print(f"Best Params:      {gs.best_params_}")
-            print("-" * 50)
 
         return report
 
