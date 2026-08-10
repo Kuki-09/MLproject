@@ -160,7 +160,6 @@ POST /predict
 
 - **Best Model:** Linear Regression
 - **R² Score:** ~0.88
-- Hyperparameter tuning improved performance significantly
 
 ---
 
